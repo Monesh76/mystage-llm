@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyStage - AI Artist Recommendations</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-music"></i>
+                    <h1>MyStage</h1>
+                </div>
+                <p class="tagline">AI-Powered Artist Discovery with Real-time Data</p>
+                <div class="auth-section">
+                    <div id="authButtons" class="auth-buttons">
+                        <button id="loginBtn" class="btn btn-outline">Login</button>
+                        <button id="registerBtn" class="btn btn-primary">Sign Up</button>
+                    </div>
+                    <div id="userProfile" class="user-profile" style="display: none;">
+                        <div class="user-info">
+                            <img id="userAvatar" src="" alt="User Avatar" class="user-avatar">
+                            <div class="user-details">
+                                <span id="userName">User Name</span>
+                                <span id="userEmail">user@example.com</span>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button id="analyticsBtn" class="btn btn-sm btn-outline" title="View Analytics">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                            <button id="logoutBtn" class="btn btn-sm btn-outline">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="discover">
+                <i class="fas fa-search"></i> Discover
+            </button>
+            <button class="tab-btn" data-tab="trending">
+                <i class="fas fa-fire"></i> Trending
+            </button>
+            <button class="tab-btn" data-tab="recommendations">
+                <i class="fas fa-magic"></i> AI Recommendations
+            </button>
+            <button class="tab-btn" data-tab="analytics" style="display: none;">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Discover Tab -->
+            <div id="discoverTab" class="tab-content active">
+                <!-- Search Section -->
+                <section class="search-section">
+                    <div class="search-container">
+                        <h2>Discover New Artists</h2>
+                        <p>Search for artists with real-time data and language filtering</p>
+                        
+                        <!-- Advanced Search Controls -->
+                        <div class="search-controls">
+                            <div class="search-filters">
+                                <div class="filter-group">
+                                    <label for="languageFilter">Language:</label>
+                                    <select id="languageFilter" class="filter-select">
+                                        <option value="">All Languages</option>
+                                        <option value="english">English</option>
+                                        <option value="spanish">Spanish</option>
+                                        <option value="hindi">Hindi</option>
+                                        <option value="telugu">Telugu</option>
+                                        <option value="tamil">Tamil</option>
+                                        <option value="korean">Korean</option>
+                                        <option value="japanese">Japanese</option>
+                                        <option value="french">French</option>
+                                        <option value="portuguese">Portuguese</option>
+                                        <option value="german">German</option>
+                                        <option value="italian">Italian</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="dataSource">Data Source:</label>
+                                    <select id="dataSource" class="filter-select">
+                                        <option value="realtime">Real-time (Spotify)</option>
+                                        <option value="cached">Cached (Algolia)</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="marketFilter">Market:</label>
+                                    <select id="marketFilter" class="filter-select">
+                                        <option value="US">United States</option>
+                                        <option value="GB">United Kingdom</option>
+                                        <option value="CA">Canada</option>
+                                        <option value="AU">Australia</option>
+                                        <option value="IN">India</option>
+                                        <option value="DE">Germany</option>
+                                        <option value="FR">France</option>
+                                        <option value="ES">Spain</option>
+                                        <option value="JP">Japan</option>
+                                        <option value="KR">South Korea</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Search for artists by name, genre, or style..." />
+                            <button id="searchBtn" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <!-- Quick Language Buttons -->
+                        <div class="language-quick-buttons">
+                            <button class="language-btn" data-language="hindi">
+                                <i class="fas fa-globe"></i> Hindi Artists
+                            </button>
+                            <button class="language-btn" data-language="telugu">
+                                <i class="fas fa-globe"></i> Telugu Artists
+                            </button>
+                            <button class="language-btn" data-language="spanish">
+                                <i class="fas fa-globe"></i> Spanish Artists
+                            </button>
+                            <button class="language-btn" data-language="korean">
+                                <i class="fas fa-globe"></i> K-Pop Artists
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- User Preferences Section -->
+                <section class="preferences-section" id="preferencesSection">
+                    <div class="preferences-container">
+                        <h3>Your Music Preferences</h3>
+                        <div id="loginPrompt" class="login-prompt">
+                            <p><i class="fas fa-lock"></i> Please log in to manage your music preferences and get personalized recommendations</p>
+                            <button class="btn btn-primary" onclick="showAuthModal('login')">Login</button>
+                        </div>
+                        <div id="preferencesForm" class="preferences-form" style="display: none;">
+                            <div class="form-group">
+                                <label for="favoriteGenres">Favorite Genres:</label>
+                                <div class="genre-tags" id="genreTags"></div>
+                                <input type="text" id="newGenre" placeholder="Add a genre and press Enter" />
+                            </div>
+                            <div class="form-group">
+                                <label for="moodPreferences">Mood Preferences:</label>
+                                <div class="mood-tags" id="moodTags"></div>
+                                <input type="text" id="newMood" placeholder="Add a mood preference and press Enter" />
+                            </div>
+                            <div class="form-group">
+                                <label for="languagePreferences">Language Preferences:</label>
+                                <div class="language-tags" id="languageTags"></div>
+                                <select id="languageSelect">
+                                    <option value="">Select a language</option>
+                                    <option value="english">English</option>
+                                    <option value="spanish">Spanish</option>
+                                    <option value="hindi">Hindi</option>
+                                    <option value="telugu">Telugu</option>
+                                    <option value="tamil">Tamil</option>
+                                    <option value="korean">Korean</option>
+                                    <option value="japanese">Japanese</option>
+                                    <option value="french">French</option>
+                                    <option value="portuguese">Portuguese</option>
+                                </select>
+                            </div>
+                            <button id="savePreferencesBtn" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Preferences
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Search Results Section -->
+                <section class="results-section">
+                    <div class="results-container">
+                        <div class="results-header">
+                            <h3>Search Results</h3>
+                            <div class="results-info">
+                                <span id="resultsCount">0 results</span>
+                                <span id="dataSourceInfo" class="data-source-badge"></span>
+                            </div>
+                        </div>
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Trending Tab -->
+            <div id="trendingTab" class="tab-content">
+                <section class="trending-section">
+                    <div class="trending-container">
+                        <div class="trending-header">
+                            <h2><i class="fas fa-fire"></i> Trending Artists</h2>
+                            <p>Real-time trending artists from around the world</p>
+                        </div>
+
+                        <div class="trending-controls">
+                            <div class="filter-group">
+                                <label for="trendingMarket">Market:</label>
+                                <select id="trendingMarket" class="filter-select">
+                                    <option value="US">United States</option>
+                                    <option value="GB">United Kingdom</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="IN">India</option>
+                                    <option value="DE">Germany</option>
+                                    <option value="FR">France</option>
+                                    <option value="ES">Spain</option>
+                                    <option value="JP">Japan</option>
+                                    <option value="KR">South Korea</option>
+                                </select>
+                            </div>
+                            <button id="refreshTrendingBtn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+
+                        <div id="trendingResults" class="trending-results"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- AI Recommendations Tab -->
+            <div id="recommendationsTab" class="tab-content">
+                <section class="ai-recommendations-section">
+                    <div class="recommendations-container">
+                        <div class="recommendations-header">
+                            <h2><i class="fas fa-magic"></i> AI-Powered Recommendations</h2>
+                            <p>Personalized suggestions based on your behavior and preferences</p>
+                        </div>
+
+                        <div id="recommendationsLoginPrompt" class="login-prompt">
+                            <div class="login-prompt-content">
+                                <i class="fas fa-robot"></i>
+                                <h3>Unlock AI Recommendations</h3>
+                                <p>Get personalized artist recommendations powered by advanced machine learning and real-time data</p>
+                                <ul class="features-list">
+                                    <li><i class="fas fa-check"></i> Collaborative filtering based on similar users</li>
+                                    <li><i class="fas fa-check"></i> Content-based analysis of your preferences</li>
+                                    <li><i class="fas fa-check"></i> Real-time behavior tracking</li>
+                                    <li><i class="fas fa-check"></i> Predictive analysis for new discoveries</li>
+                                </ul>
+                                <button class="btn btn-primary btn-large" onclick="showAuthModal('login')">
+                                    <i class="fas fa-sign-in-alt"></i> Login for AI Recommendations
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="recommendationsContent" style="display: none;">
+                            <div class="recommendations-controls">
+                                <div class="control-group">
+                                    <label for="recommendationLanguage">Language Preference:</label>
+                                    <select id="recommendationLanguage" class="filter-select">
+                                        <option value="">All Languages</option>
+                                        <option value="english">English</option>
+                                        <option value="spanish">Spanish</option>
+                                        <option value="hindi">Hindi</option>
+                                        <option value="telugu">Telugu</option>
+                                        <option value="tamil">Tamil</option>
+                                        <option value="korean">Korean</option>
+                                        <option value="japanese">Japanese</option>
+                                    </select>
+                                </div>
+                                <div class="control-group">
+                                    <label for="includeTrending">Include Trending:</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="includeTrending" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <button id="getRecommendationsBtn" class="btn btn-primary">
+                                    <i class="fas fa-magic"></i> Get AI Recommendations
+                                </button>
+                            </div>
+
+                            <!-- Predictive Insights -->
+                            <div id="predictiveInsights" class="predictive-insights">
+                                <h3><i class="fas fa-crystal-ball"></i> Your Music Predictions</h3>
+                                <div id="predictionsContent" class="predictions-content"></div>
+                            </div>
+
+                            <div id="recommendationsList" class="recommendations-list"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analyticsTab" class="tab-content">
+                <section class="analytics-section">
+                    <div class="analytics-container">
+                        <div class="analytics-header">
+                            <h2><i class="fas fa-chart-line"></i> Your Music Analytics</h2>
+                            <p>Insights into your music discovery patterns and preferences</p>
+                        </div>
+
+                        <div class="analytics-controls">
+                            <div class="filter-group">
+                                <label for="analyticsTimeframe">Timeframe:</label>
+                                <select id="analyticsTimeframe" class="filter-select">
+                                    <option value="7">Last 7 days</option>
+                                    <option value="30" selected>Last 30 days</option>
+                                    <option value="90">Last 90 days</option>
+                                </select>
+                            </div>
+                            <button id="refreshAnalyticsBtn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+
+                        <div id="analyticsContent" class="analytics-content">
+                            <!-- Analytics widgets will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p id="loadingText">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+
+        <!-- Authentication Modal -->
+        <div id="authModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="authModalTitle">Login</h2>
+                    <span class="close" onclick="closeAuthModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <!-- Login Form -->
+                    <div id="loginForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="loginEmail">Email or Username:</label>
+                            <input type="text" id="loginEmail" placeholder="Enter your email or username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password:</label>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                        </div>
+                        <button id="loginSubmitBtn" class="btn btn-primary btn-full">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <div class="auth-divider">
+                            <span>OR</span>
+                        </div>
+                        <button id="googleLoginBtn" class="btn btn-google btn-full">
+                            <i class="fab fa-google"></i> Sign in with Google
+                        </button>
+                        <p class="auth-switch">
+                            Don't have an account? <a href="#" onclick="switchToRegister()">Sign up</a>
+                        </p>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerForm" class="auth-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="registerEmail">Email:</label>
+                            <input type="email" id="registerEmail" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerUsername">Username:</label>
+                            <input type="text" id="registerUsername" placeholder="Choose a username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password:</label>
+                            <input type="password" id="registerPassword" placeholder="Create a password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password:</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                        </div>
+                        <button id="registerSubmitBtn" class="btn btn-primary btn-full">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                        <div class="auth-divider">
+                            <span>OR</span>
+                        </div>
+                        <button id="googleRegisterBtn" class="btn btn-google btn-full">
+                            <i class="fab fa-google"></i> Sign up with Google
+                        </button>
+                        <p class="auth-switch">
+                            Already have an account? <a href="#" onclick="switchToLogin()">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendation Feedback Modal -->
+        <div id="feedbackModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Rate This Recommendation</h2>
+                    <span class="close" onclick="closeFeedbackModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="feedback-content">
+                        <div id="feedbackArtistInfo" class="feedback-artist-info"></div>
+                        <div class="feedback-options">
+                            <button class="feedback-btn feedback-love" data-feedback="like">
+                                <i class="fas fa-heart"></i> Love it!
+                            </button>
+                            <button class="feedback-btn feedback-save" data-feedback="save">
+                                <i class="fas fa-bookmark"></i> Save for Later
+                            </button>
+                            <button class="feedback-btn feedback-skip" data-feedback="skip">
+                                <i class="fas fa-step-forward"></i> Not Interested
+                            </button>
+                            <button class="feedback-btn feedback-dislike" data-feedback="dislike">
+                                <i class="fas fa-thumbs-down"></i> Dislike
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html> 

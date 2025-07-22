@@ -1,0 +1,160 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/artist-recommendation-engine:latest', '.']
+  
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/artist-recommendation-engine:latest']
+  
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'artist-recommendation-engine'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/artist-recommendation-engine:latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--max-instances'
+      - '10'
+      - '--min-instances'
+      - '1'
+      - '--timeout'
+      - '300'
+      - '--concurrency'
+      - '80'
+      - '--set-env-vars'
+      - 'ALGOLIA_APP_ID=${_ALGOLIA_APP_ID},ALGOLIA_API_KEY=${_ALGOLIA_API_KEY},OPENAI_API_KEY=${_OPENAI_API_KEY}'
+
+  # Deploy Cloud Functions
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'get-recommendations'
+      - '--runtime'
+      - 'python311'
+      - '--trigger-http'
+      - '--allow-unauthenticated'
+      - '--source'
+      - './cloud_functions'
+      - '--entry-point'
+      - 'get_recommendations_http'
+      - '--memory'
+      - '512MB'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '540s'
+      - '--set-env-vars'
+      - 'RECOMMENDATION_SERVICE_URL=${_RECOMMENDATION_SERVICE_URL},PUBSUB_TOPIC_NAME=artist-recommendations'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'update-preferences'
+      - '--runtime'
+      - 'python311'
+      - '--trigger-http'
+      - '--allow-unauthenticated'
+      - '--source'
+      - './cloud_functions'
+      - '--entry-point'
+      - 'update_preferences_http'
+      - '--memory'
+      - '256MB'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '300s'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'health-check'
+      - '--runtime'
+      - 'python311'
+      - '--trigger-http'
+      - '--allow-unauthenticated'
+      - '--source'
+      - './cloud_functions'
+      - '--entry-point'
+      - 'health_check_http'
+      - '--memory'
+      - '256MB'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '60s'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'process-analytics'
+      - '--runtime'
+      - 'python311'
+      - '--trigger-topic'
+      - 'artist-recommendations'
+      - '--source'
+      - './cloud_functions'
+      - '--entry-point'
+      - 'process_recommendation_analytics'
+      - '--memory'
+      - '256MB'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '300s'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'cleanup-cache'
+      - '--runtime'
+      - 'python311'
+      - '--trigger-topic'
+      - 'cloud-builds'
+      - '--source'
+      - './cloud_functions'
+      - '--entry-point'
+      - 'cleanup_cache'
+      - '--memory'
+      - '512MB'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '540s'
+
+# Store images in Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/artist-recommendation-engine:latest'
+
+# Substitution variables
+# Note: Set these as secret environment variables in Google Cloud Build
+# Configure actual values in Google Cloud Console > Cloud Build > Settings > Substitutions
+substitutions:
+  _ALGOLIA_APP_ID: 'your-algolia-app-id'
+  _ALGOLIA_API_KEY: 'your-algolia-api-key' 
+  _OPENAI_API_KEY: 'your-openai-api-key'
+  _SPOTIFY_CLIENT_ID: 'your-spotify-client-id'
+  _SPOTIFY_CLIENT_SECRET: 'your-spotify-client-secret'
+  _RECOMMENDATION_SERVICE_URL: 'https://artist-recommendation-engine-${PROJECT_ID}-uc.a.run.app' 
