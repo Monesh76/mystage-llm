@@ -474,9 +474,9 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## 📞 Support & Contact
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/mystage-llm/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/mystage-llm/discussions)
-- **Email**: support@mystage-llm.com
+- **Issues**: [GitHub Issues](https://github.com/monesh76/mystage-llm/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/monesh76/mystage-llm/discussions)
+- **Email**: monesh6302@gmail.com
 
 ---
 
